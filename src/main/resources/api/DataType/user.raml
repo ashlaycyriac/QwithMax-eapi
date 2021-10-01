@@ -1,0 +1,20 @@
+#%RAML 1.0 DataType
+type : object
+properties:
+  name:
+   type : string
+   required: true
+   description : name of the user who is creating the account
+   example : "Max Mule"
+  address:
+    type : string
+    required: false
+    example : "Max House, Mule Street, Mule world"
+  mobileNumber:
+    type : integer
+    required: true
+    example : 9090909090
+  password:
+    type: string
+    required : true
+    example : "thisisastrongpassword"

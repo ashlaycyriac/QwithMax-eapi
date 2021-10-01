@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <http:listener-config name="mule-q4u-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="${https.port}" protocol="HTTPS">
+            <tls:context>
+                <tls:key-store type="jks" path="keystore.jks" keyPassword="12345678" password="12345678" />
+            </tls:context>
+        </http:listener-connection>
+    </http:listener-config>
+    <apikit:config name="mule-q4u-config" api="mule-q4u.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="8ac025e1-593e-4bb3-b6f7-39d1af0aafa0" basePath="/api">
+        <http:request-connection protocol="HTTPS" host="${proc.host}" port="${proc.port}" />
+    </http:request-config>
+    <configuration-properties doc:name="Configuration properties" doc:id="ae010222-e421-46b5-972a-aaf6c58c2885" file="common.properties" />
+    <api-gateway:autodiscovery apiId="${api.Id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="5b56f592-fc0f-4ed5-a391-4b55cf49bc9b" flowRef="mule-q4u-main" />
+    <flow name="mule-q4u-main">
+        <http:listener config-ref="mule-q4u-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="mule-q4u-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="mule-q4u-console">
+        <http:listener config-ref="mule-q4u-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="mule-q4u-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="put:\acceptUser:application\json:mule-q4u-config">
+        <http:request method="PUT" doc:name="acceptUser request" doc:id="cf095a4a-8d95-4048-9c74-508eb0c6c0cd" config-ref="HTTP_Request_configuration" path="/acceptUser">
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400,404,500,504" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back data" doc:id="7075bf21-c21f-469f-858d-8f886bb33587">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="put:\endSession:application\json:mule-q4u-config">
+        <http:request method="PUT" doc:name="endSesion request" doc:id="2ec0c034-9f82-4799-a09a-da16fe65b8e9" config-ref="HTTP_Request_configuration" path="/endSession">
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back the data" doc:id="594cde2c-f93d-4441-8149-070682b59a20">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\queue:application\json:mule-q4u-config">
+        <http:request method="DELETE" doc:name="cancel reservation request" doc:id="99a9ed1a-0f3a-40e6-a8d3-849e54b3e0ee" config-ref="HTTP_Request_configuration" path="/queue">
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back data" doc:id="113bf5fa-7750-472f-96fe-c0a3d3438d3e">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="get:\Shop:mule-q4u-config">
+        <http:request method="GET" doc:name="get shops" doc:id="1f3c6b11-1b5c-4a6c-9e90-892618aad553" config-ref="HTTP_Request_configuration" path="/Shop">
+            <http:query-params><![CDATA[#[{"pincode": attributes.queryParams.pincode}]]]></http:query-params>
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back data" doc:id="857fad98-7ca6-41bf-b190-51898e3a5850">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="get:\getPosition:mule-q4u-config">
+        <http:request method="GET" doc:name="get position request" doc:id="26692e00-eabb-4625-bb82-4ebea1462161" config-ref="HTTP_Request_configuration" path="/getPosition">
+            <http:query-params><![CDATA[#[attributes.queryParams]]]></http:query-params>
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back data" doc:id="675ab050-b350-45a4-8567-170fc81e8d73">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="get:\getReport:mule-q4u-config">
+        <http:request method="GET" doc:name="getReport request" doc:id="40e44749-7487-4238-8a96-0ecc31bd4bf0" config-ref="HTTP_Request_configuration" path="/getReport">
+            <http:query-params><![CDATA[#[attributes.queryParams]]]></http:query-params>
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back data" doc:id="23124d3b-530f-4d72-a75e-9c6f2f7566f8">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="get:\queue:mule-q4u-config">
+        <http:request method="GET" doc:name="get next user in queue request" doc:id="d6f99a47-2006-49a5-84aa-0f4c4ba4fdd9" config-ref="HTTP_Request_configuration" path="/queue">
+            <http:query-params><![CDATA[#[attributes.queryParams]]]></http:query-params>
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back data" doc:id="aaa074de-3b06-4429-ad9c-ef2c1ba12c1f">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="get:\Shop\(number):mule-q4u-config">
+        <http:request method="GET" doc:name="login shop request" doc:id="cacf7c6a-8ae8-4671-a210-eeec63d5cb2a" config-ref="HTTP_Request_configuration" path="#[&quot;/Shop/&quot; ++ attributes.uriParams.number]">
+            <http:query-params><![CDATA[#[attributes.queryParams]]]></http:query-params>
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back data" doc:id="97e24c97-317b-44f2-8537-32ef5fd2cb21">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="get:\User\(number):mule-q4u-config">
+        <http:request method="GET" doc:name="login user request" doc:id="cb9dc59c-557b-448e-86f4-c4a81dd12d00" config-ref="HTTP_Request_configuration" path="#[&quot;/User/&quot; ++ attributes.uriParams.number]">
+            <http:query-params><![CDATA[#[attributes.queryParams]]]></http:query-params>
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back data" doc:id="7117c940-1cf2-48f4-a28c-1772a8206dc1">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="post:\Shop:application\json:mule-q4u-config">
+        <http:request method="POST" doc:name="signup shop" doc:id="cef587dc-c139-4165-84f1-94643289c57f" config-ref="HTTP_Request_configuration" path="/Shop">
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400,404,500,504" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back data" doc:id="78558e58-1366-42d0-8747-7156181c6e5b">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="post:\User:application\json:mule-q4u-config">
+        <http:request method="POST" doc:name="singup user" doc:id="80ac28de-31fc-43d6-801c-8b4d529ef93a" config-ref="HTTP_Request_configuration" path="/User">
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400,404,500,504" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back data" doc:id="a2abf585-69e6-41ff-b2bf-2c20dbea6088">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="post:\queue:application\json:mule-q4u-config">
+        <http:request method="POST" doc:name="get in queue request" doc:id="c53da793-8837-488a-97c7-a3f13917de95" config-ref="HTTP_Request_configuration" path="/queue">
+            <http:response-validator>
+                <http:success-status-code-validator values="200,201,400" />
+            </http:response-validator>
+        </http:request>
+        <ee:transform doc:name="send back data" doc:id="8dbadf1c-4371-47f9-8f7f-eca8f37cce2a">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="get:\getActiveSpots:mule-q4u-config">
+		<http:request method="GET" doc:name="get active spots request" doc:id="bc0e01ba-9b10-4753-81db-844756431e1f" config-ref="HTTP_Request_configuration" path="/getActiveSpots" >
+			<http:query-params ><![CDATA[#[attributes.queryParams]]]></http:query-params>
+			<http:response-validator >
+				<http:success-status-code-validator values="200,201,400" />
+			</http:response-validator>
+		</http:request>
+		<ee:transform doc:name="send back data" doc:id="e04e8341-af69-4a89-a0f7-81fb6029bb97" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/json
+---
+attributes.statusCode]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+    </flow>
+</mule>

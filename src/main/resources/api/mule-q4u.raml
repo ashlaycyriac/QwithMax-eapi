@@ -1,0 +1,179 @@
+#%RAML 1.0
+title: mule-Q4U
+description: Virtual queing solution to help users in pandemic
+
+types:
+  User : !include DataType/user.raml
+  Shop : !include DataType/shop.raml
+  registerQueue: !include DataType/queue.raml
+  req: !include  DataType/UiReq.raml
+
+/User:
+
+  /{number}:
+    get:
+     queryParameters:
+        password:
+          type: string
+          required: true
+          example: "password"
+     description: 
+     responses:
+      200:
+        body:
+          application/json: |
+           {"username":"max","password":"password"}
+  post:
+    description: This endpoint is used to create a new user
+    body:
+      application/json:
+        type: User
+    responses:
+      201:
+        body:
+          application/json: |
+            {"message":"user created with id 1"}
+/Shop:
+  get:
+    queryParameters:
+      pincode:
+        type: number
+        required: true
+        description: to get the shops in a pincode
+    description: 
+    responses:
+      200:
+        body:
+          application/json: |
+           {"message":"message"}
+  /{number}:
+    get:
+     queryParameters:
+        password:
+          type: string
+          required: true
+          example: "password"
+     description: 
+     responses:
+      200:
+        body:
+          application/json: |
+           {"username":"max",
+           "password":"password"}
+  post:
+    description: This endpoint is used to create a new user
+    body:
+      application/json:
+        type: Shop
+    responses:
+      201:
+        body:
+          application/json: |
+            {"message":"shop created with id 1"}
+/queue:
+  post:
+    description: the endpoint is used when a user wants into queue of a particular shop
+    body:
+      application/json:
+       type: registerQueue
+    responses:
+      201:
+        body:
+          application/json: |
+            {"message":"added to queue for shop kfc"}
+  delete:
+    description: the endpoint is used to delete a reservation made
+    body:
+      application/json:
+       type: req
+    responses:
+     200:
+        body:
+          application/json: |
+            {"message":"deleted reservation"}
+  get:
+    description: this endpoint is used to allow a user into the shop
+    queryParameters:
+      shopId:
+        required: true
+        type: integer
+        description: The id of the shop
+        example: 4
+    responses:
+      200:
+        body:
+          application/json: |
+           {"message":"message"}
+/acceptUser:
+  put:
+    description: when the user is ready to be taken in
+    body:
+      application/json:
+        type: req
+    responses:
+     200:
+        body:
+          application/json: |
+            {"message":"user entered shop"}
+/endSession:
+  put:
+    description: when the user is leaving the shop
+    body:
+      application/json:
+        type: req
+    responses:
+     200:
+        body:
+          application/json: |
+            {"message":"user left shop"}
+/getPosition:
+  get:
+    queryParameters:
+      shopId:
+        type: number
+        required: true
+        description: shop id
+      userId:
+        type: number
+        required: true
+        description: user id
+      token:
+        type: string
+        required: true
+        description: token
+/getReport:
+  get:
+    queryParameters:
+      shopid:
+        type: number
+        required: true
+        example: 1
+      from:
+        type: date-only
+        required: true
+        example: 2015-05-23
+      to:
+        type: date-only
+        required: true
+        example: 2015-05-25
+      email:
+        type: string
+        required: true
+        example: "max@mule.com"
+      emailFlag:
+        type: integer
+        required: true
+        example: 1
+/getActiveSpots:
+  get:
+    queryParameters:
+      userid:
+        type: integer
+        required: true
+        example: 1
+
+
+    
+
+    
+    
