@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="mule-q4u-suite.xml" />
+	<munit:test name="put:\endSession:application\json:mule-q4u-config-test" doc:id="e15c91d1-d2cb-4b62-bd47-9589c0a0dd38" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock endSesion request" doc:id="1326b61f-7cd9-489d-84bb-65bece40acea" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="2ec0c034-9f82-4799-a09a-da16fe65b8e9" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://putendSessionapplicationjsonmuleq4uconfigtest\mock_payload1.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://putendSessionapplicationjsonmuleq4uconfigtest\mock_attributes1.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://putendSessionapplicationjsonmuleq4uconfigtest\mock_variable_1.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="4e765e50-c6d5-4d66-8c56-73589fe59bc1" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://putendSessionapplicationjsonmuleq4uconfigtest\set-event_payload1.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://putendSessionapplicationjsonmuleq4uconfigtest\set-event_attributes1.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://putendSessionapplicationjsonmuleq4uconfigtest\set-event_variable_1.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to put:\endSession:application\json:mule-q4u-config" doc:id="b1d5a63d-2b02-46ee-95ac-96471d7e565f" name="put:\endSession:application\json:mule-q4u-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="94015edd-9900-444c-90c7-d8a1689e2a48" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import putendSessionapplicationjsonmuleq4uconfigtest::assert_expression_payload1
+---
+assert_expression_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="put:\acceptUser:application\json:mule-q4u-config-test" doc:id="38d59c1a-8246-4a07-9352-030cdbd27766" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock acceptUser request" doc:id="ad79324e-e982-4680-bda8-1ffaf7c496c1" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="cf095a4a-8d95-4048-9c74-508eb0c6c0cd" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://putacceptUserapplicationjsonmuleq4uconfigtest\mock_payload1.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://putacceptUserapplicationjsonmuleq4uconfigtest\mock_attributes1.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://putacceptUserapplicationjsonmuleq4uconfigtest\mock_variable_1.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="2a69cc17-6c02-4b43-941c-e75fb43536ed" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://putacceptUserapplicationjsonmuleq4uconfigtest\set-event_payload1.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://putacceptUserapplicationjsonmuleq4uconfigtest\set-event_attributes1.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://putacceptUserapplicationjsonmuleq4uconfigtest\set-event_variable_1.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to put:\acceptUser:application\json:mule-q4u-config" doc:id="2754aeb5-92ae-4672-b39f-e4babaf1af15" name="put:\acceptUser:application\json:mule-q4u-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="640a9708-dc59-456b-87b8-c235b7f7f494" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import putacceptUserapplicationjsonmuleq4uconfigtest::assert_expression_payload1
+---
+assert_expression_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="delete:\queue:application\json:mule-q4u-config-test" doc:id="cf294908-dec8-46dd-a280-403ddfef1a4e" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock cancel reservation request" doc:id="a2c2b711-2162-40a9-b3b9-7290cf4c6765" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="99a9ed1a-0f3a-40e6-a8d3-849e54b3e0ee" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://deletequeueapplicationjsonmuleq4uconfigtest\mock_payload.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://deletequeueapplicationjsonmuleq4uconfigtest\mock_attributes.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://deletequeueapplicationjsonmuleq4uconfigtest\mock_variable_.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="4a457aaf-1838-4123-b74c-2a4cef6454d8" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://deletequeueapplicationjsonmuleq4uconfigtest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://deletequeueapplicationjsonmuleq4uconfigtest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://deletequeueapplicationjsonmuleq4uconfigtest\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to delete:\queue:application\json:mule-q4u-config" doc:id="1d79ff2e-fd2a-4177-9a28-3130c2a1dfe2" name="delete:\queue:application\json:mule-q4u-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="7900e3ab-cbb4-4d8a-b8c3-d2719955e1b4" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import deletequeueapplicationjsonmuleq4uconfigtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
